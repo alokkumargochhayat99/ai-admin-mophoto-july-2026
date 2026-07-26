@@ -1,0 +1,236 @@
+:root {
+    --mo-red: #B3122A;
+    --mo-red-deep: #7E0C1E;
+    --mo-yellow: #F6B60B;
+    --mo-bg: #FAF7F2;
+    --mo-card: #FFFFFF;
+    --mo-ink: #2B1F1A;
+    --mo-muted: #95867D;
+    --mo-line: #EDE4D8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--mo-bg);
+    font-family: 'Poppins', sans-serif;
+    color: var(--mo-ink);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+
+.display-font {
+    font-family: 'Playfair Display', serif;
+}
+
+.login-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- Top banner ---------- */
+.login-top {
+    background: var(--mo-red);
+    padding: 48px 24px 56px;
+    text-align: center;
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+}
+
+.logo-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--mo-red-deep);
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+}
+
+.login-top .brand {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+}
+
+.login-top .brand .dot {
+    color: var(--mo-yellow);
+}
+
+.login-top .tagline {
+    color: rgba(255, 255, 255, .75);
+    font-size: .82rem;
+    margin-top: 4px;
+}
+
+/* ---------- Form card ---------- */
+.login-body {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 20px;
+    margin-top: -36px;
+}
+
+.login-card {
+    background: var(--mo-card);
+    border: 1px solid var(--mo-line);
+    border-radius: 20px;
+    padding: 28px 22px 24px;
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-card h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.login-card .sub {
+    font-size: .82rem;
+    color: var(--mo-muted);
+    margin-bottom: 24px;
+}
+
+.form-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--mo-ink);
+    margin-bottom: 6px;
+}
+
+.input-mo {
+    position: relative;
+}
+
+.input-mo i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--mo-muted);
+    font-size: .95rem;
+}
+
+.input-mo input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid var(--mo-line);
+    border-radius: 12px;
+    font-size: .9rem;
+    background: #FCFAF6;
+    color: var(--mo-ink);
+}
+
+.input-mo input:focus {
+    outline: none;
+    border-color: var(--mo-red);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(179, 18, 42, .08);
+}
+
+.input-mo .toggle-eye {
+    left: auto;
+    right: 14px;
+    cursor: pointer;
+}
+
+.form-row-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .78rem;
+    margin: 14px 0 20px;
+}
+
+.form-check-input:checked {
+    background-color: var(--mo-red);
+    border-color: var(--mo-red);
+}
+
+.link-mo {
+    color: var(--mo-red);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-mo {
+    width: 100%;
+    background: var(--mo-red);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    font-size: .92rem;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.btn-mo:hover {
+    background: var(--mo-red-deep);
+    color: #fff;
+}
+
+.divider-mo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0;
+    color: var(--mo-muted);
+    font-size: .75rem;
+}
+
+.divider-mo::before,
+.divider-mo::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--mo-line);
+}
+
+.social-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.btn-social {
+    flex: 1;
+    border: 1px solid var(--mo-line);
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--mo-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-social:hover {
+    background: #F7F2EA;
+}
+
+.signup-line {
+    text-align: center;
+    font-size: .84rem;
+    color: var(--mo-muted);
+}
+
+@media (min-width: 576px) {
+    .login-top {
+        padding: 56px 24px 70px;
+    }
+}
