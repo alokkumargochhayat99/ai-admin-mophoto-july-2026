@@ -11,6 +11,7 @@ const CreateEventComp = () => {
         guestPin: "",
         uploadMode: "both",
         showMode: "selfie_only",
+        loginMode: "pin",
         appPassword: "",
         coverImage: null,
 
@@ -25,6 +26,8 @@ const CreateEventComp = () => {
 
     const [formData, setFormData] = useState(initialFormData);
 
+    const [coverPreview, setCoverPreview] = useState(null);
+
     const [loading, setLoading] = useState(false);
 
     // handle on chnage 
@@ -35,6 +38,33 @@ const CreateEventComp = () => {
             ...prev,
             [name]: value
         }));
+    };
+
+    // login mode change — face-login forces
+    // upload/show mode to selfie-only camera flow
+    const handleLoginModeChange = (e) => {
+
+        const { value } = e.target;
+
+        if (value === "face") {
+
+            setFormData(prev => ({
+                ...prev,
+                loginMode: "face",
+                uploadMode: "camera",
+                showMode: "selfie_only",
+                guestPin: ""
+            }));
+
+        } else {
+
+            setFormData(prev => ({
+                ...prev,
+                loginMode: "pin"
+            }));
+
+        }
+
     };
 
     // studio object 
@@ -54,12 +84,28 @@ const CreateEventComp = () => {
     // handel img chnage 
     const handleImage = (e) => {
 
+        const file = e.target.files[0];
+
         setFormData(prev => ({
             ...prev,
-            coverImage: e.target.files[0]
+            coverImage: file
         }));
 
+        if (file) {
+
+            setCoverPreview(
+                URL.createObjectURL(file)
+            );
+
+        } else {
+
+            setCoverPreview(null);
+
+        }
+
     };
+
+    const isFaceLogin = formData.loginMode === "face";
 
     // submit 
     const handleSubmit = async (e) => {
@@ -78,6 +124,7 @@ const CreateEventComp = () => {
             data.append("guestPin", formData.guestPin);
             data.append("uploadMode", formData.uploadMode);
             data.append("showMode", formData.showMode);
+            data.append("loginMode", formData.loginMode);
             data.append("appPassword", formData.appPassword);
 
             data.append(
@@ -101,6 +148,8 @@ const CreateEventComp = () => {
 
                 setFormData(initialFormData);
 
+                setCoverPreview(null);
+
                 // File input bhi reset karna padega (agar preview/file selected dikha rahe ho)
                 document.getElementById("coverUpload").value = "";
             }
@@ -111,6 +160,11 @@ const CreateEventComp = () => {
         catch (err) {
 
             console.error(err);
+
+            alert(
+                err?.response?.data?.message ||
+                "Something went wrong"
+            );
 
         }
 
@@ -149,17 +203,6 @@ const CreateEventComp = () => {
                         <Link className="nav-link" to='/create-events'><i className="bi bi-plus-square"></i>Create Event</Link>
                        
                     </nav>
-                    {/* <div className="side-footer-card">
-                        <i className="bi bi-stars" style={{ color: '#B87E00', fontSize: '1.1rem' }}></i>
-                        <div className="fw-semibold mt-1" style={{ fontSize: '.78rem' }}>Creator Pass</div>
-                        <div style={{ fontSize: '.66rem', color: 'var(--mo-muted)' }}>10,000 free AI face-matched shares</div>
-                        <button className="btn btn-sm w-100 mt-2" style={{
-                            background: 'var(--mo-red)',
-                            color: '#fff',
-                            fontWeight: 600,
-                            borderRadius: 8
-                        }}>Get Pass</button>
-                    </div> */}
                 </div>
 
                     {/* <!-- ============ HEADER ============ --> */}
@@ -231,17 +274,61 @@ const CreateEventComp = () => {
                                 </div>
 
                                 <div className="row g-3">
+
+                                    {/* <!-- ============ LOGIN MODE ============ --> */}
+                                    <div className="col-12">
+                                        <label className="field-label">Login Mode</label>
+                                        <div className="pill-group">
+                                            <div className="pill-option">
+                                                <input
+                                                    type="radio"
+                                                    name="loginMode"
+                                                    value="pin"
+                                                    checked={formData.loginMode === "pin"}
+                                                    onChange={handleLoginModeChange}
+                                                    id="lm-pin" />
+                                                <label htmlFor="lm-pin"><i className="bi bi-key"></i> Login With Event ID &amp; PIN</label>
+                                            </div>
+                                            <div className="pill-option">
+                                                <input
+                                                    type="radio"
+                                                    name="loginMode"
+                                                    value="face"
+                                                    checked={formData.loginMode === "face"}
+                                                    onChange={handleLoginModeChange}
+                                                    id="lm-face" />
+                                                <label htmlFor="lm-face"><i className="bi bi-person-check"></i> Login With Face</label>
+                                            </div>
+                                        </div>
+                                        {isFaceLogin && (
+                                            <div className="field-hint">
+                                                Face login events skip the PIN — guests join by scanning their selfie. Upload &amp; Show mode are locked to selfie-matching below.
+                                            </div>
+                                        )}
+                                    </div>
+
                                     <div className="col-12 col-md-6">
-                                        <label className="field-label">Guest PIN</label>
+                                        <label className="field-label">
+                                            Guest PIN
+                                            {formData.loginMode === "pin" && (
+                                                <span className="req-hint"> *required</span>
+                                            )}
+                                        </label>
                                         <div className="pin-group">
                                             <input type="text"
                                                 name='guestPin'
                                                 value={formData.guestPin}
                                                 onChange={handleChange}
+                                                required={formData.loginMode === "pin"}
+                                                disabled={isFaceLogin}
                                                 className="field-input" maxlength="6" />
-                                            <button type="button" className="btn-regen"><i className="bi bi-arrow-repeat"></i></button>
+                                            <button type="button" className="btn-regen" disabled={isFaceLogin}><i className="bi bi-arrow-repeat"></i></button>
                                         </div>
-                                        <div className="field-hint">Guests enter this PIN to join the event</div>
+                                        <div className="field-hint">
+                                            {isFaceLogin
+                                                ? "Not needed for face-login events"
+                                                : "Guests enter this PIN to join the event"}
+                                        </div>
                                     </div>
                                     <div className="col-12 col-md-6">
                                         <label className="field-label">App Password <span className="opt">(admin access)</span></label>
@@ -281,6 +368,7 @@ const CreateEventComp = () => {
                                                     checked={formData.uploadMode === "gallery"}
 
                                                     onChange={handleChange}
+                                                    disabled={isFaceLogin}
                                                     id="um-selfie" />
                                                 <label htmlFor="um-selfie"><i className="bi bi-images"></i>Only Gallery</label>
                                             </div>
@@ -294,7 +382,9 @@ const CreateEventComp = () => {
 
                                                     checked={formData.uploadMode === "both"}
 
-                                                    onChange={handleChange} id="um-both" />
+                                                    onChange={handleChange}
+                                                    disabled={isFaceLogin}
+                                                    id="um-both" />
                                                 <label htmlFor="um-both"><i className="bi bi-check2-all"></i> Both</label>
                                             </div>
                                         </div>
@@ -313,6 +403,7 @@ const CreateEventComp = () => {
                                                     checked={formData.showMode === "all_photos"}
 
                                                     onChange={handleChange}
+                                                    disabled={isFaceLogin}
                                                     id="sm-selfie" />
                                                 <label for="sm-selfie"><i className="bi bi-card-image"></i>All Photos</label>
                                             </div>
@@ -339,6 +430,7 @@ const CreateEventComp = () => {
                                                     checked={formData.showMode === "all_photos_with_find_me"}
 
                                                     onChange={handleChange}
+                                                    disabled={isFaceLogin}
                                                     id="sm-all-find" />
                                                 <label for="sm-all-find"><i className="bi bi-search-heart"></i>All Photos With Find Me</label>
                                             </div>
@@ -431,10 +523,25 @@ const CreateEventComp = () => {
                                     <div className="ic"><i className="bi bi-image"></i></div>
                                     Cover Image
                                 </div>
-                                <label for="coverUpload" className="dropzone d-block">
-                                    <div className="ic"><i className="bi bi-cloud-arrow-up"></i></div>
-                                    <div className="txt">Click to upload cover image</div>
-                                    <div className="sub">PNG or JPG, up to 5MB, recommended 1200×630</div>
+                                <label htmlFor="coverUpload" className="dropzone d-block">
+                                    {coverPreview ? (
+                                        <img
+                                            src={coverPreview}
+                                            alt="Cover preview"
+                                            style={{
+                                                width: '100%',
+                                                maxHeight: '220px',
+                                                objectFit: 'cover',
+                                                borderRadius: '10px'
+                                            }}
+                                        />
+                                    ) : (
+                                        <>
+                                            <div className="ic"><i className="bi bi-cloud-arrow-up"></i></div>
+                                            <div className="txt">Click to upload cover image</div>
+                                            <div className="sub">PNG or JPG, up to 5MB, recommended 1200×630</div>
+                                        </>
+                                    )}
                                 </label>
                                 <input type="file" onChange={handleImage} id="coverUpload" accept="image/*" className="d-none" />
                             </div>
@@ -442,7 +549,16 @@ const CreateEventComp = () => {
                             {/* <!-- ============ STICKY ACTION BAR ============ --> */}
                             <div class="action-bar form-shell">
 
-                                <button type="submit" class="btn-mo">Create Event</button>
+                                <button type="submit" class="btn-mo" disabled={loading}>
+                                    {loading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Creating Event...
+                                        </>
+                                    ) : (
+                                        "Create Event"
+                                    )}
+                                </button>
                             </div>
 
                         </form>
@@ -454,4 +570,4 @@ const CreateEventComp = () => {
     )
 }
 
-export default CreateEventComp
+export default CreateEventComp;
