@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axiosClient from '../api/axiosClient';
 import { Link } from 'react-router-dom';
+import DriveBackupSwitch from './DriveBackupSwitch';
 
 
 const CreateEventComp = () => {
@@ -14,6 +15,7 @@ const CreateEventComp = () => {
         loginMode: "pin",
         appPassword: "",
         coverImage: null,
+        driveBackup: true,
 
         studio: {
             name: "",
@@ -64,6 +66,18 @@ const CreateEventComp = () => {
             }));
 
         }
+
+    };
+
+    // drive backup switch
+    const handleDriveToggle = (e) => {
+
+        const { checked } = e.target;
+
+        setFormData(prev => ({
+            ...prev,
+            driveBackup: checked
+        }));
 
     };
 
@@ -126,6 +140,7 @@ const CreateEventComp = () => {
             data.append("showMode", formData.showMode);
             data.append("loginMode", formData.loginMode);
             data.append("appPassword", formData.appPassword);
+            data.append("driveBackup", formData.driveBackup);
 
             data.append(
                 "studio",
@@ -153,7 +168,14 @@ const CreateEventComp = () => {
                 // File input bhi reset karna padega (agar preview/file selected dikha rahe ho)
                 document.getElementById("coverUpload").value = "";
             }
-            alert(res.data.message);
+            // Drive problems never stop the event; just tell the admin
+            let msg = res.data.message;
+
+            if (res.data.driveWarning) {
+                msg += `\n\nGoogle Drive: ${res.data.driveWarning}\nYou can retry from the Edit Event page.`;
+            }
+
+            alert(msg);
 
         }
 
@@ -201,6 +223,7 @@ const CreateEventComp = () => {
                     <nav className="nav flex-column mt-2">
                         <Link className="nav-link active" to='/all-events'><i className="bi bi-calendar-event"></i>My Events</Link>
                         <Link className="nav-link" to='/create-events'><i className="bi bi-plus-square"></i>Create Event</Link>
+                        <Link className="nav-link" to='/drive-backup'><i className="bi bi-cloud-arrow-up"></i>Drive Backup</Link>
                        
                     </nav>
                 </div>
@@ -438,6 +461,11 @@ const CreateEventComp = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* <!-- ============ GOOGLE DRIVE BACKUP ============ --> */}
+                            <DriveBackupSwitch
+                                checked={formData.driveBackup}
+                                onChange={handleDriveToggle} />
 
                             {/* <!-- ============ STUDIO DETAILS ============ --> */}
                             <div className="form-card">

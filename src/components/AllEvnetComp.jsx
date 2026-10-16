@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosClient from "../api/axiosClient";
 import { Link, useNavigate } from "react-router-dom";
+import DriveStatusPill from "./DriveStatusPill";
 
 const AllEvnetComp = () => {
 
@@ -60,6 +61,7 @@ const AllEvnetComp = () => {
                     <nav className="nav flex-column mt-2">
                         <Link className="nav-link active" to='/all-events'><i className="bi bi-calendar-event"></i>My Events</Link>
                         <Link className="nav-link" to='/create-events'><i className="bi bi-plus-square"></i>Create Event</Link>
+                        <Link className="nav-link" to='/drive-backup'><i className="bi bi-cloud-arrow-up"></i>Drive Backup</Link>
                        
                     </nav>
                     {/* <div className="side-footer-card">
@@ -138,6 +140,7 @@ const AllEvnetComp = () => {
                                 <th>Status</th>
                                 <th>Studio</th>
                                 <th>Guest login</th>
+                                <th>Drive Backup</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -146,7 +149,7 @@ const AllEvnetComp = () => {
                             {loading ? (
 
                                 <tr>
-                                    <td colSpan="4" className="text-center py-4">
+                                    <td colSpan="8" className="text-center py-4">
                                         Loading...
                                     </td>
                                 </tr>
@@ -154,7 +157,7 @@ const AllEvnetComp = () => {
                             ) : events.length === 0 ? (
 
                                 <tr>
-                                    <td colSpan="4" className="text-center py-4">
+                                    <td colSpan="8" className="text-center py-4">
                                         No Events Found
                                     </td>
                                 </tr>
@@ -212,6 +215,12 @@ const AllEvnetComp = () => {
                                                         <span className="status-pill status-closed">OFF</span>
                                                     </>
                                             }
+                                        </td>
+
+                                        <td>
+                                            {event.drive
+                                                ? <DriveStatusPill status={event.drive.status} />
+                                                : <span className="ev-code">-</span>}
                                         </td>
 
                                         <td>

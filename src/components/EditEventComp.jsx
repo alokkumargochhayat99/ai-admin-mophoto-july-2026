@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axiosClient from '../api/axiosClient';
+import DriveBackupSwitch from './DriveBackupSwitch';
+import CopyLink from './CopyLink';
 
 const EditEventComp = () => {
     const { id } = useParams();
@@ -27,6 +29,7 @@ const EditEventComp = () => {
         loginMode: "pin",
         guestLoginEnabled: true,
         photographerLoginEnabled: true,
+        driveBackup: false,
         appPassword: "",
         coverImage: null,
 
@@ -45,6 +48,10 @@ const EditEventComp = () => {
     const [loading, setLoading] = useState(false);
 
     const [pageLoading, setPageLoading] = useState(true);
+
+    // drive info (folder link, errors) from the server
+    const [drive, setDrive] = useState(null);
+    const [folderBusy, setFolderBusy] = useState(false);
 
     // handle on chnage 
     const handleChange = (e) => {
@@ -166,6 +173,9 @@ const EditEventComp = () => {
                     photographerLoginEnabled:
                         event.photographerLoginEnabled !== false,
 
+                    // old events have no value = OFF
+                    driveBackup: !!event.driveBackup,
+
 
                     appPassword: "",
 
@@ -176,6 +186,8 @@ const EditEventComp = () => {
                     }
 
                 });
+
+                setDrive(event.drive || null);
 
                 // cover 
                 if (event.coverImage) {
@@ -206,6 +218,31 @@ const EditEventComp = () => {
 
     }, [id]);
 
+    // retry creating the Drive folder
+    const handleRetryFolder = async () => {
+
+        try {
+
+            setFolderBusy(true);
+
+            await axiosClient.post(`/api/admin/drive/event/${id}/ensure-folder`);
+
+            await getEvent();
+
+        } catch (err) {
+
+            alert(err?.response?.data?.message || "Could not create the Drive folder");
+
+            getEvent();
+
+        } finally {
+
+            setFolderBusy(false);
+
+        }
+
+    }
+
     // handel update 
     const handleUpdate = async (e) => {
 
@@ -227,6 +264,7 @@ const EditEventComp = () => {
             data.append("guestLoginEnabled", formData.guestLoginEnabled);
             data.append("photographerLoginEnabled", formData.photographerLoginEnabled);
             data.append("appPassword", formData.appPassword);
+            data.append("driveBackup", formData.driveBackup);
 
             data.append(
                 "studio",
@@ -244,7 +282,14 @@ const EditEventComp = () => {
 
             if (res.status === 200) {
 
-                alert(res.data.message);
+                let msg = res.data.message;
+
+                // Drive problems never block the update; just tell the admin
+                if (res.data.driveWarning) {
+                    msg += `\n\nGoogle Drive: ${res.data.driveWarning}\nYou can retry from this page.`;
+                }
+
+                alert(msg);
 
                 navigate('/all-events');
 
@@ -281,6 +326,7 @@ const EditEventComp = () => {
                     <nav className="nav flex-column mt-2">
                         <Link className="nav-link active" to='/all-events'><i className="bi bi-calendar-event"></i>My Events</Link>
                         <Link className="nav-link" to='/create-events'><i className="bi bi-plus-square"></i>Create Event</Link>
+                        <Link className="nav-link" to='/drive-backup'><i className="bi bi-cloud-arrow-up"></i>Drive Backup</Link>
                        
                     </nav>
                 </div>
@@ -561,7 +607,43 @@ const EditEventComp = () => {
                             </div>
                         </div>
 
-                        {/* <!-- ============ STUDIO DETAILS ============ --> */}
+                        {/* <!-- ============ GOOGLE DRIVE BACKUP ============ --> */}
+                    <DriveBackupSwitch
+                        checked={formData.driveBackup}
+                        onChange={handleToggle}>
+
+                        {drive && drive.folderLink && (
+                            <div className="mt-3">
+                                <div className="field-label">Drive folder link</div>
+                                <CopyLink link={drive.folderLink} />
+                            </div>
+                        )}
+
+                        {drive && drive.folderError && (
+                            <div className="drv-alert drv-alert-red mt-3">
+                                <i className="bi bi-exclamation-octagon-fill"></i>
+                                <div>Drive folder problem: {drive.folderError}</div>
+                            </div>
+                        )}
+
+                        {drive && drive.backup && (!drive.folderReady || drive.folderError) && (
+                            <button type="button" className="btn-edit mt-3" onClick={handleRetryFolder} disabled={folderBusy}>
+                                <i className="bi bi-folder-plus"></i>
+                                {folderBusy ? 'Creating...' : 'Create / retry Drive folder'}
+                            </button>
+                        )}
+
+                        {drive && drive.backup && (
+                            <div className="mt-3">
+                                <Link to={`/drive-backup/${id}`} className="drv-back mb-0">
+                                    <i className="bi bi-bar-chart-line"></i>View backup progress
+                                </Link>
+                            </div>
+                        )}
+
+                    </DriveBackupSwitch>
+
+                    {/* <!-- ============ STUDIO DETAILS ============ --> */}
                         <div className="form-card">
                             <div className="card-title">
                                 <div className="ic"><i className="bi bi-camera-reels"></i></div>
